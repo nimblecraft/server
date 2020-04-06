@@ -14,4 +14,4 @@ proc Warn*(str: string) =
 
 proc Error*(str: string) =
   consoleLogger.log(lvlError, str)
-  fileLogger.log(lvlWarn, str)
+  fileLogger.log(lvlError, str)
