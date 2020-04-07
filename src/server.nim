@@ -6,4 +6,4 @@ const
 
 info("Starting server!")
 
-LoadConfig(saveFile)
+loadConfig(saveFile)
