@@ -1,4 +1,0 @@
-[Server at 09:30:54][INFO]: Starting server!
-[Server at 09:30:54][ERROR]: failed to read config file
-[Server at 09:31:01][INFO]: Starting server!
-[Server at 09:31:01][ERROR]: failed to read config file
