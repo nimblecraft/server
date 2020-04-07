@@ -11,7 +11,7 @@
     "allow-nether": true,
     "enable-command-blocks": true,
     "ebable-rcon": false,
-    "resource-ack": "",
+    "resource-pack": "",
     "world-name": "world",
     "player-idle-timeout": 0,
     "motd": "A Minecraft Server",
