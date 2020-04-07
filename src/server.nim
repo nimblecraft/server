@@ -1,5 +1,4 @@
-import logger
-import config
+import logger, config, tick
 
 const
   saveFile = "server.json"
@@ -7,3 +6,5 @@ const
 info("Starting server!")
 
 loadConfig(saveFile)
+
+startTicking()
