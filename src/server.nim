@@ -2,7 +2,7 @@ import logger
 import config
 
 const
-    saveFile = "server.json"
+  saveFile = "server.json"
 
 info("Starting server!")
 
