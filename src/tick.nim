@@ -1,4 +1,4 @@
-import times
+import times, cronjob
 
 const 
   ticksPerSecond = 20
@@ -8,7 +8,11 @@ proc getNanoseconds(): float64 =
   return epochTime() * 1_000_000_000
 
 proc tick() =
-  echo "tick"
+  for i in 0..cronjobs.len - 1:
+    dec cronjobs[i].tickLeft
+    if cronjobs[i].tickLeft <= 0:
+      cronjobs[i].callback()
+      cronjobs[i].tickLeft = cronjobs[i].tickDelay
 
 proc startTicking*() =
   var 
