@@ -1,11 +1,11 @@
-import times, cronjob
+import times, cronjob, os
 
 const 
   ticksPerSecond = 20
-  ns = 1_000_000_000 / ticksPerSecond
+  ms = 1_000 / ticksPerSecond
 
-proc getNanoseconds(): float64 = 
-  return epochTime() * 1_000_000_000
+proc getMilliseconds(): float64 = 
+  return epochTime() * 1_000
 
 proc tick() =
   for i in 0..cronjobs.len - 1:
@@ -16,15 +16,11 @@ proc tick() =
 
 proc startTicking*() =
   var 
-    delta: float = 0
-    now: float64
-    last: float64 = getNanoseconds()
+    last: float64 = getMilliseconds()
 
   while true:
-    delta += (now - last) / ns
-    last = now
-    now = getNanoseconds()
-
-    if delta >= 1:
+    if getMilliseconds() - last >= ms:
       tick()
-      delta = 0
+      last = getMilliseconds()
+
+    sleep(1)
