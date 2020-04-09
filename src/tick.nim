@@ -1,4 +1,5 @@
-import times, cronjob, os
+import times, os
+import cronjob
 
 const 
   ticksPerSecond = 20

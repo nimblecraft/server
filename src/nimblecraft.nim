@@ -1,4 +1,4 @@
-import logger, config, tick
+import logger, config, tick, input, cronjob
 
 const
   saveFile = "server.json"
@@ -6,5 +6,7 @@ const
 info("Starting server!")
 
 loadConfig(saveFile)
+
+startInputThread()
 
 startTicking()
