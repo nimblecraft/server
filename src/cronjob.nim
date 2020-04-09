@@ -16,5 +16,5 @@ type
 var
   cronjobs*: seq[Cronjob]
 
-proc AddCronjob*(callback: CronjobCallback, tickDelay: int) =
+proc addCronjob*(callback: CronjobCallback, tickDelay: int) =
   cronjobs.add(Cronjob(callback: callback, tickDelay: tickDelay, tickLeft: tickDelay))
