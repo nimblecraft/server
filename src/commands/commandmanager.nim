@@ -1,4 +1,5 @@
 import strutils
+import ../logger
 import command
 import help, stop
 
@@ -21,7 +22,9 @@ proc processCommand*(cmd: string, withPrefix=false): bool{.gcsafe.} =
     if cmd.name == args[0]:
       idx = i
 
-  if idx == -1: return false
+  if idx == -1: 
+    echo cmd, ": invalid command"
+    return false
 
   args.delete(0)
 
