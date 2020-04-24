@@ -1,3 +1,5 @@
+import strutils, unicode
+
 proc readVarInt*(varInt: seq[byte]): int32 =
   for idx, b in varInt:
     var value: int32 = cast[int32](b and 127'u8)
@@ -33,3 +35,18 @@ proc writeVarLong*(inp: int64): seq[byte] =
     input = input shr 7
 
   result.add(cast[byte](input))
+
+proc bytesToString*(bytes: seq[byte]): string =
+  for b in bytes:
+    result &= cast[char](b)
+
+proc writeString*(str: string): seq[byte] =
+  var length = writeVarInt(cast[int32](str.len))
+  result.add(length)
+
+  for c in str:
+    result.add(cast[byte](c))
+
+proc unsShortToBytes*(val: uint16): seq[byte] =
+    result.add(cast[byte]((val shr 8) and 0b1111_1111))
+    result.add(cast[byte](val and 0b1111_1111))
