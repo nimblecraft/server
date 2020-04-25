@@ -15,7 +15,6 @@ var connections: seq[Connection]
 proc process(client: AsyncSocket){.async.} =
   while true:
     let line = await client.recvLine()
-    echo line
 
 proc serve(){.async.} =
   var server = newAsyncSocket()
@@ -31,7 +30,6 @@ proc serve(){.async.} =
     connection.state = ConnectionState.Handshake
     connections.add(connection)
 
-    #sendPacket(connection, 0, )
     discard connection.sendHandshake()
 
     asyncCheck process(client)

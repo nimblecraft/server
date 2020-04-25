@@ -12,23 +12,15 @@ type
     packetID*: int32 # not varint
     data*: seq[byte]
 
-proc getPacketInBytes*(packet: Packet): string =
-  var bytes: seq[byte]
-
-  bytes.add(packet.length)
-  bytes.add(packet.packetID)
-  bytes.add(packet.data)
-
-  echo bytes
-
-  result &= bytesToString(packet.length)
-  result &= bytesToString(packet.packetID)
-  result &= bytesToString(packet.data)
+proc getPacketInBytes*(packet: Packet): seq[byte] =
+  result.add(packet.length)
+  result.add(packet.packetID)
+  result.add(packet.data)
 
 proc sendPacket*(connection: Connection, packet: Packet){.async.} =
-  var bytes: string = getPacketInBytes(packet)
+  var bytes = getPacketInBytes(packet)
   var socket = connection.socket
-  await socket.send(bytes)
+  await socket.send(addr bytes, bytes.len)
 
 proc sendPacket*(connection: Connection, packetID: int32, data: seq[byte]){.async.} =
   var packetid = writeVarInt(packetID)

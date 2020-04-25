@@ -1,4 +1,4 @@
-import strutils, unicode
+import strutils, unicode, endians
 
 proc readVarInt*(varInt: seq[byte]): int32 =
   for idx, b in varInt:
@@ -36,10 +36,6 @@ proc writeVarLong*(inp: int64): seq[byte] =
 
   result.add(cast[byte](input))
 
-proc bytesToString*(bytes: seq[byte]): string =
-  for b in bytes:
-    result &= cast[char](b)
-
 proc writeString*(str: string): seq[byte] =
   var length = writeVarInt(cast[int32](str.len))
   result.add(length)
@@ -50,3 +46,11 @@ proc writeString*(str: string): seq[byte] =
 proc unsShortToBytes*(val: uint16): seq[byte] =
     result.add(cast[byte]((val shr 8) and 0b1111_1111))
     result.add(cast[byte](val and 0b1111_1111))
+
+proc bigEndianUnsignedShort*(short: uint16): uint16 =
+  var cpy = result
+  bigEndian16(addr result, addr cpy)
+
+proc bigEndianSignedShort*(short: int16): int16 =
+  var cpy = result
+  bigEndian16(addr result, addr cpy)
