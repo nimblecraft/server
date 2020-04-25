@@ -1,5 +1,5 @@
-import asyncnet, asyncdispatch, strutils
-import logger, config, tick, input, networking/packet, networking/connection, networking/handshake
+import asyncnet, asyncdispatch, strutils, sequtils
+import logger, config, tick, input, networking/packet, networking/packetutils, networking/connection
 
 const
   saveFile = "server.json"
@@ -12,9 +12,11 @@ startInputThread()
 
 var connections: seq[Connection]
 
-proc process(client: AsyncSocket){.async.} =
+proc process(connection: Connection){.async.} =
   while true:
-    let line = await client.recvLine()
+    let disconnected = await readPacket(connection)
+    #TODO: Remove connection from connections
+    if disconnected: break
 
 proc serve(){.async.} =
   var server = newAsyncSocket()
@@ -30,9 +32,7 @@ proc serve(){.async.} =
     connection.state = ConnectionState.Handshake
     connections.add(connection)
 
-    discard connection.sendHandshake()
-
-    asyncCheck process(client)
+    asyncCheck process(connection)
 
 asyncCheck serve()
 runForever()

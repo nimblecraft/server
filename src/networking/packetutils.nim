@@ -1,10 +1,11 @@
 import strutils, unicode, endians
 
-proc readVarInt*(varInt: seq[byte]): int32 =
+proc readVarInt*(varInt: seq[byte]): tuple[value: int32, bytesNum: int] =
   for idx, b in varInt:
+    inc result[1]
     var value: int32 = cast[int32](b and 127'u8)
 
-    result = result or (value shl (7 * idx))
+    result[0] = result[0] or (value shl (7 * idx))
 
     if (b and 128'u8) == 0: break
 
@@ -18,11 +19,12 @@ proc writeVarInt*(inp: int32): seq[byte] =
 
   result.add(cast[byte](input))
 
-proc readVarLong*(varLong: seq[byte]): int64 =
+proc readVarLong*(varLong: seq[byte]): tuple[value: int64, bytesNum: int] =
   for idx, b in varLong:
+    inc result[1]
     var value: int64 = cast[int64](b and 127'u8)
 
-    result = result or (value shl (7 * idx))
+    result[0] = result[0] or (value shl (7 * idx))
 
     if (b and 128'u8) == 0: break
 
@@ -36,7 +38,7 @@ proc writeVarLong*(inp: int64): seq[byte] =
 
   result.add(cast[byte](input))
 
-proc writeString*(str: string): seq[byte] =
+proc stringToBytes*(str: string): seq[byte] =
   var length = writeVarInt(cast[int32](str.len))
   result.add(length)
 
