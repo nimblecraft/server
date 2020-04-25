@@ -1,5 +1,5 @@
-import asyncnet, asyncdispatch, strutils, sequtils
-import logger, config, tick, input, networking/packet, networking/packetutils, networking/connection
+import asyncnet, asyncdispatch, strutils
+import logger, config, tick, input, networking/packethandler, networking/connection
 
 const
   saveFile = "server.json"

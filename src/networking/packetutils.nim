@@ -1,6 +1,6 @@
-import strutils, unicode, endians
+import endians
 
-proc readVarInt*(varInt: seq[byte]): tuple[value: int32, bytesNum: int] =
+proc readVarInt*(varInt: seq[byte]): tuple[value: int, bytesNum: int] =
   for idx, b in varInt:
     inc result[1]
     var value: int32 = cast[int32](b and 127'u8)
