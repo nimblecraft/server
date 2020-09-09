@@ -85,6 +85,7 @@ proc handlePacket*(connection: Connection, packet: RawPacket){.async.} =
       echo "username: ", username
 
 proc readPacket*(connection: Connection): Future[bool]{.async.} =
+  echo "readPacket()"
   var packet = new RawPacket
 
   # Create new seq, length = varint's max length

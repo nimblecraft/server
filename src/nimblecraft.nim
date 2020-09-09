@@ -16,7 +16,9 @@ proc process(connection: Connection){.async.} =
   while true:
     let disconnected = await readPacket(connection)
     #TODO: Remove connection from connections
-    if disconnected: break
+    if disconnected: 
+      echo "disconnect"
+      return
 
 proc serve(){.async.} =
   var server = newAsyncSocket()
