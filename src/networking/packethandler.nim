@@ -114,7 +114,7 @@ proc handlePacket*(connection: Connection, packet: RawPacket){.async.} =
       let username = buffReadString()
       echo "username: ", username
 
-      # Make packet for requesting encryption key
+      #[# Make packet for requesting encryption key
       makePacket(PACKET_REQUEST_ENCRYPTION)
       
       # Server ID - empty
@@ -135,7 +135,7 @@ proc handlePacket*(connection: Connection, packet: RawPacket){.async.} =
       # Write verify token
       buffWriteBytes(connection.verifyToken)
 
-      await sendCurrentPacket(connection)
+      await sendCurrentPacket(connection)]#
 
 proc readPacket*(connection: Connection): Future[bool]{.async.} =
   echo "readPacket()"

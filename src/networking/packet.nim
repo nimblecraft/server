@@ -7,12 +7,12 @@ const
   PACKET_REQUEST_ENCRYPTION* = 0x01
 
 type
-  Packet* = object
+  Packet* = ref object
     length*: seq[byte] # varint
     packetID*: seq[byte] # varint
     data*: seq[byte]
 
-  RawPacket* = object
+  RawPacket* = ref object
     length*: int # not varint, packetID + data
     packetID*: int # not varint
     data*: seq[byte]
