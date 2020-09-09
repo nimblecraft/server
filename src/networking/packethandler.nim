@@ -1,21 +1,30 @@
 import asyncnet, asyncdispatch, sequtils
-import packet, packetutils, connection
+import sysrandom
+import packet, packetutils, connection, ../rsa
 
 var
+  # Read
   currentDataBuffer: seq[byte]
   currentDataBufferIndex: int
+  # Write
+  currentPacket: RawPacket
 
 proc sendPacket*(connection: Connection, packet: Packet){.async.} =
   var bytes = packetToBytes(packet)
   var socket = connection.socket
   await socket.send(addr bytes, bytes.len)
+  echo "packet sent"
 
-proc sendPacket*(connection: Connection, packetID: int32, data: seq[byte]){.async.} =
-  var packetid = writeVarInt(packetID)
-  var length = writeVarInt(cast[int32](packetid.len + data.len))
+proc sendRawPacket*(connection: Connection, packet: RawPacket){.async.} =
+  var p: Packet
+  p.packetID = writeVarInt(packet.packetID)
+  p.data = packet.data
+  p.length = writeVarInt(p.packetID.len + p.data.len)
+  #printRawPacket(packet)
+  await sendPacket(connection, p)
 
-  var packet = Packet(length: length, packetID: packetID, data: data)
-  await sendPacket(connection, packet)
+proc sendCurrentPacket*(connection: Connection){.async.} =
+  await sendRawPacket(connection, currentPacket)
 
 proc bindDataBuffer(data: seq[byte]) =
   currentDataBuffer = data
@@ -52,6 +61,21 @@ proc buffReadString(): string =
   for i in 0..len-1:
     result.add(buffReadChar())
 
+proc makePacket(packetID: int) =
+  currentPacket.packetID = packetID
+
+proc buffWriteVarInt(val: int) =
+  currentPacket.data.add(writeVarInt(cast[int32](val)))
+
+proc buffWriteVarLong(val: int64) =
+  currentPacket.data.add(writeVarLong(val))
+
+proc buffWriteString(str: string) =
+  currentPacket.data.add(writeString(str))
+
+proc buffWriteBytes(bytes: seq[byte]) =
+  currentPacket.data.add(bytes)
+
 # NOTE: shorts are Big Endian
 proc buffReadUnsignedShort(): uint16 =
   var bytes = currentDataBuffer[currentDataBufferIndex..currentDataBufferIndex+1]
@@ -61,20 +85,26 @@ proc buffReadUnsignedShort(): uint16 =
 
   currentDataBufferIndex += 2
 
+# TODO: Better packet system
+
 proc handlePacket*(connection: Connection, packet: RawPacket){.async.} =
   bindDataBuffer(packet.data)
 
   if connection.state == ConnectionState.Handshake:
     if packet.packetID == PACKET_HANDSHAKE:
+      # Parse protocol version
       let protocol = buffReadVarInt()
       echo "protocol version: ", protocol
 
+      # Parse hostname/ip
       let hostname = buffReadString()
       echo "hostname or ip: ", hostname
 
+      # Parse port
       let port = buffReadUnsignedShort()
       echo "port: ", port
 
+      # Parse next state
       let nextState: ConnectionState = cast[ConnectionState](buffReadVarInt())
       echo "nextState: ", nextState
 
@@ -84,13 +114,37 @@ proc handlePacket*(connection: Connection, packet: RawPacket){.async.} =
       let username = buffReadString()
       echo "username: ", username
 
+      # Make packet for requesting encryption key
+      makePacket(PACKET_REQUEST_ENCRYPTION)
+      
+      # Server ID - empty
+      buffWriteString("")
+
+      # Write length of public key
+      buffWriteVarInt(publicKey.len)
+
+      # Write public key
+      buffWriteBytes(publicKey)
+
+      # Generate verify key
+      connection.verifyToken = toSeq(getRandomBytes(4))
+
+      # Write length of verify token
+      buffWriteVarInt(connection.verifyToken.len)
+
+      # Write verify token
+      buffWriteBytes(connection.verifyToken)
+
+      await sendCurrentPacket(connection)
+
 proc readPacket*(connection: Connection): Future[bool]{.async.} =
-  var packet = new RawPacket
+  var packet: RawPacket
 
   # Create new seq, length = varint's max length
   var packetLengthBufferArray: array[5, byte]
 
   let readLen = await connection.socket.recvInto(addr packetLengthBufferArray, packetLengthBufferArray.len)
+  echo "packet received"
 
   # Check if socket is disconnected
   if readLen == 0: return true
@@ -107,7 +161,7 @@ proc readPacket*(connection: Connection): Future[bool]{.async.} =
   # packet length - (5 - packet length's size)
   var tailLength = len[0] - (5 - len[1])
 
-  let _ = await connection.socket.recvInto(addr packetBuffer, tailLength)
+  discard await connection.socket.recvInto(addr packetBuffer, tailLength)
 
   # Create seq for whole packet
   var buffer: seq[byte]
@@ -118,7 +172,7 @@ proc readPacket*(connection: Connection): Future[bool]{.async.} =
   # Add tail of packet
   buffer.add(packetBuffer[0..tailLength])
 
-  var packetid = readVarInt(buffer[len[1]..5])
+  var packetid = readVarInt(buffer[len[1]..buffer.len-1])
 
   packet.length = len[0]
   packet.packetID = packetid[0]
