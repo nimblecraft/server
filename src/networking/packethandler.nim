@@ -161,8 +161,11 @@ proc readPacket*(connection: Connection): Future[bool]{.async.} =
   # packet length - (5 - packet length's size)
   var tailLength = len[0] - (5 - len[1])
 
-  discard await connection.socket.recvInto(addr packetBuffer, tailLength)
+  var bytesRead = await connection.socket.recvInto(addr packetBuffer, tailLength)
 
+  if bytesRead == 0:
+    return true
+  
   # Create seq for whole packet
   var buffer: seq[byte]
 
