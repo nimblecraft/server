@@ -7,3 +7,4 @@ type
   Connection* = ref object
     socket*: AsyncSocket
     state*: ConnectionState
+    verifyToken*: seq[byte]

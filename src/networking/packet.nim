@@ -2,16 +2,17 @@ import strutils
 
 #PacketID's
 const
-  PACKET_HANDSHAKE*   = 0
-  PACKET_LOGIN_START* = 0
+  PACKET_HANDSHAKE* = 0x0
+  PACKET_LOGIN_START* = 0x0
+  PACKET_REQUEST_ENCRYPTION* = 0x01
 
 type
-  Packet* = ref object
+  Packet* = object
     length*: seq[byte] # varint
     packetID*: seq[byte] # varint
     data*: seq[byte]
 
-  RawPacket* = ref object
+  RawPacket* = object
     length*: int # not varint, packetID + data
     packetID*: int # not varint
     data*: seq[byte]

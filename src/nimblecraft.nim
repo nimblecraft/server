@@ -1,4 +1,4 @@
-import asyncnet, asyncdispatch, strutils
+import asyncnet, asyncdispatch, strutils, rsa
 import logger, config, tick, input, networking/packethandler, networking/connection
 
 const

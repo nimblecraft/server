@@ -9,8 +9,8 @@ proc readVarInt*(varInt: seq[byte]): tuple[value: int, bytesNum: int] =
 
     if (b and 128'u8) == 0: break
 
-proc writeVarInt*(inp: int32): seq[byte] =
-  var input: int32 = inp
+proc writeVarInt*(inp: int): seq[byte] =
+  var input: int32 = cast[int32](inp)
 
   while (input and -128'i32) != 0:
     result.add(cast[byte]((input and 127'i32) or 128'i32))
@@ -38,14 +38,14 @@ proc writeVarLong*(inp: int64): seq[byte] =
 
   result.add(cast[byte](input))
 
-proc stringToBytes*(str: string): seq[byte] =
+proc writeString*(str: string): seq[byte] =
   var length = writeVarInt(cast[int32](str.len))
   result.add(length)
 
   for c in str:
     result.add(cast[byte](c))
 
-proc unsShortToBytes*(val: uint16): seq[byte] =
+proc writeUnsignedShort*(val: uint16): seq[byte] =
     result.add(cast[byte]((val shr 8) and 0b1111_1111))
     result.add(cast[byte](val and 0b1111_1111))
 
